@@ -18,6 +18,12 @@ doc_title: "A Survey of Provenance"
 # Author names, ordered as a list. Each author name should be formatted as 'First Last'
 authors:
   - "Frossie Economou"
+  - "Gregory Dubois-Felsmann"
+  - "Keith Bechtol"
+  - "Robert Gruendl"
+  - "Simon Krughoff"
+  - "Brian Stalder"
+  - "Amanda Bauer"
 
 # Current document revision date, YYYY-MM-DD
 # Only set this field if you need to manually fix the revision date;
