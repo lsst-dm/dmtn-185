@@ -572,10 +572,11 @@ Recommendations
 Metrics-level provenance
 ========================
 
+In this document, “metrics” refers to persisted performance indicators quantifying the technical and/or scientific evaluation of a unit of scalar data or computational process related to the Science Pipelines and/or derived data products.
+
 What do we want?
 ----------------
 
-In this document, “metrics” refers to persisted performance indicators quantifying the technical and/or scientific evaluation of a unit of data or computational process related to the Science Pipelines and/or derived data products.
 The metrics framework (lsst.verify) specifies a need for provenance information for two purposes:
 
 1. Identify uniquely a production run (job ID) that resulted in a metric measurement having been produced
@@ -586,71 +587,63 @@ See `SQR-019 <http://sqr-019.lsst.io>`__ for more discussion. 
 What design do we have?
 -----------------------
 
-There was an assumption that there would be a workflow-level provenance system to provide (1) and (2).
-With the Gen3 Butler and the task-level provenance model, the needed information can largely be derived.
+The original baseline assumed that there would be a workflow-level provenance system to provide (1) and (2).
+With the advent of the Gen3 Butler and the task-level provenance model, the needed information can largely be derived.
 
 The QA Strategy Working Group (`DMTN-085 <https://dmtn-085.lsst.io/>`__) makes several specific recommendations related to the calculation, persistence, and dissemination of metrics.
 
--  The computation, selection, and aggregation steps that define a metric should be well compartmentalized
--  Metric values should be stored with full granularity (source, CCD, patch, dataset).
--  Metric values should have Butler dataIds.
--  use the Data Butler to persist and retrieve metric values.
+-  The computation, selection, and aggregation steps that define a metric should be cleanly encapsulated
+-  Metric values should be stored with complete provenance granularity (source, CCD, patch, dataset)
+-  Metric values should have Butler dataIds and the Data Butler should be usable to persist and retrieve metric values
 -  Formalise the lsst.verify.metrics system as the source of truth for metric definitions
 
 The association of metrics with Butler dataIds and storage of metrics using the Data Butler are significant steps towards the two goals above.
 
 We anticipate that metrics (in the more general sense of derived scalars) will also be generated from other types of data besides the Science Pipelines and derived data products, for example, metrics derived from telemetry and the state of the system, as well as measures
-of survey progress.
-SQuaSH is a potential system for monitoring such metrics.
+of survey progress and other compound metrics.
+SQuaSH is the de facto system for curating such metrics. 
 
 What data paths do we have?
 ---------------------------
 
 Butler has a concept of a “run” as in a “run collection” - a group of datasets that hold the outputs of an execution run (job).
-The identifier of this run collection is passed in as an argument to the workflow
-system.
-This can serve as a job ID for the metrics system, however note that it is up to the submitter to ask for a unique job ID (as opposed to, for example, a systems like Jenkins where a job is submitted and the system assigns the job ID).
+The identifier of this run collection is passed in as an argument to the workflow system.
+This can serve as a job ID for the metrics system; however note that it is up to the submitter to ask for a unique job ID (as opposed to, for example, a workflow system like Jenkins where a job is submitted and the system assigns the job ID).
 For a further discussion of policies for collection names, see `DMTN-167 <http://dmtn-167.lsst.io>`__ .
-*Jim says it is planned that the low level executor for pipeline tasks will be generating a unique identifier for a pipeline execution run (so a “job ID”)*
+
+The Butler team is planning for the low level executor for pipeline tasks to generate a unique identifier for a pipeline execution run, which effectively can be used as the "job ID" initially envisaged.
 
 Given a run identifier, the Butler will be able to be queried for other information pertinent to the run, such as the instrument the processed data originated from.
-
-*This assumes that on an engineering level it is enforced that a run
-collection ID is a one-shot (eg it cannot be appended to in a further
-pipeline run) - check with Middleware*
 
 What is the state of implementation?
 ------------------------------------
 
-Currently, the metrics framework uses a basic shim for provenance
-information. Leveraging the emerging capabilities of the Gen3 Butler
-will have to be planned. Moreover, this would work better if the current
-metric measurement dispatch system was replaced with a Butler put into a
-custom data store. This work is not currently planned in construction. 
+Previously, the metrics framework used a basic shim for provenance information.
+Leveraging the emerging capabilities of the Gen3 Butler addressed the need for that shim. 
+Storing metrics as Butler ad-hoc dataset types allows metrics to be directly persisted in the run collection with the associated data they were derived from.
+Specifically, a Butler repo can hold lsst.verify.Measurement objects in collections.
+When tasks that compute metrics put the lsst.verify.Measurement back into butler, we fulfil most of the provenance goals in this area.
+(This approach is used, for example, by the faro metrics calculation software.)
+An advantage of this approach is that the configuration information used for the execution is also stored in the Butler repo.
 
-Note that while that would associate a metric in a run context with that run collection it would not be queryable to, for example, use that metric value to select a dataset for a future processing run (there is no way to use that information for quantum graph generation).
+Storing metrics in the Butler as ad-hoc datasets signicantly limits the usability and utility of these metrics. If the metrics were supported  as a native structured Butler dataset, then we would be able to
 
-Current implementation notes: Butler repo can hold lsst.verify.Measurement objects in collections.
-If tasks that compute metrics can put the lsst.verify.Measurement back into butler, that is a significant step in provenance. This approach is used, for example, by the faro metrics calculation software. An advantage of this approach is that the configuration information used for the execution is also stored in the Butler repo.
+1. Query the Butler for what metrics are available (metrics discovery)
+2. Have the ability to filter other Butler queries on the basis of metric measurements
+3. Significantly increase the robustness of metric transport to Squash by associating the lsst.verify metrics specification with the Butler 
 
-The lsst.verify.Job object has metadata.
-If the repo and collection (or job ID) were added to the metadata, it would then be possible to trace back, e.g., from SQuaSH output to the specific results in the repo and have access to configuration information, etc.
-The success will be driven by the extent to which these hooks are used in practice, and what
-conventions are used.
-As far as I know, this association and filling in of metadata is not done automatically in general.
-
-Currently, in-situ metrics are stored as lsst.verify.Job objects for shipping to SQuaSH for monitoring and trending analysis.
-Going forward, in general, we want in-situ metrics captured as lsst.verify.Measurements to be persisted via the Gen-3 Butler as lsst.verify.Measurement objects.
-There is now tooling is lsst verify to reconstitute a Job from lsst.very.Measurements persisted in the Butler for dispatch to SQuaSH.
+We understand such development is not planned in construction. 
+   
+*[maybe a diagram/example]* 
 
 Recommendations
+---------------
 
--  [REC-MET-001] For metrics that can be associated with a Butler dataId, the metrics should be persisted using the Data Butler as the source of truth. The dataId associated with the metric should use the full granularity.
--  [REC-MET-002] Where possible, metrics should be persisted using Gen3 Butler infrastructure to utilize this provenance system, following the reco?
+-  [REC-MET-001] For metrics that can be associated with a Butler dataId, the metrics should be persisted using the Data Butler as the source of truth. The dataId associated with the metric should use the full granularity
+-  [REC-MET-002] Any system that uses Butler data to derive metrics should persist them in the Butler provided that the metrics are associable with a Data ID
 -  [REC-MET-003] When lsst.verify.Job objects are exported, the exported object should included the needed information (run collection and dataId) to associate with the source of truth metric persisted with Data Butler
--  [REC-MET-004] As suggested by the QA Strategy Working Group (`DMTN-085 <https://dmtn-085.lsst.io/>`__), collections of related metric values should be stored in a format that can be efficiently queried and joined with survey metadata (e.g., telemetry, exposure id, survey property maps). This data store should be associated with the Data Butler.
--  [REC-MET-005] A plan should be developed for persisting metrics that are not directly associated with the Science Pipelines and derived data products (e.g., derived from system telemetry, survey progress).
-   These are outside the scope of the Gen 3 middleware provenance framework.
+-  [REC-MET-004] A plan should be developed for persisting metrics that are not directly associated with non-Butler persisted metrics.
+- [REC-MET-005] Even if effort from implementation is not available in construction, we should develop a conceptual design for structured, semantically rich storage of metrics in the Butler
 
 
 Log Provenance
@@ -702,6 +695,7 @@ Additional notes:
    -  webcam images to display on a public-facing “observatory status
          dashboard” webpage.
 
+- We should require a glpbal provenance key for all data curating provenance associating all curated artifacst with a time and if possible a data association. This is to allow collation of provenance curated by heterogenous systems. Original phrasing follows:  [REC-MET-004] As suggested by the QA Strategy Working Group (`DMTN-085 <https://dmtn-085.lsst.io/>`__), collections of related metric values should be stored in a format that can be efficiently queried and joined with survey metadata (e.g., telemetry, exposure id, survey property maps). This data store should be associated with the Data Butler.
 
 
 .. .. rubric:: References
