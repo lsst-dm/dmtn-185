@@ -440,27 +440,17 @@ Recommendations
 File-level provenance
 =====================
 
-We define file-level provenance as the expression of the predecessor
-data and processes that were used in the generation of a product. The
-simplest version of this is to express the immediate predecessor (data
-products) and processes involved in the generation of a product (usually
-as sets of tuples, for example, child-parent and/or child-process). By
-tracing a provenance chain one can then reconstruct the relationship of
-products to upstream or downstream products and processes. An expert
-user can exploit knowledge of the processing system or file
-relationships for more efficient probes.
+We define file-level provenance as the inputs that contributed to the production of that data, including other files and software.
+There are various ways of represent these, eg. a graph of predecessor data.
+By tracing a provenance chain one can then reconstruct the relationship of products to upstream or downstream products and processes.
 
-An alternative means to express provenance would take the form that
-relates a collection of inputs and outputs, along with a record of a
-broader pipeline task and configuration. The granularity of such
-provenance is not amenable to answering questions about how a product
-was used without *a priori*\ knowledge of the pipeline processing.
+An alternative means to express provenance would take the form that associates a collection of inputs and outputs, along with a record of a broader pipeline task and configuration.
+The granularity of such provenance is not amenable to answering questions about how a product
+was used without *a priori*\ knowledge of the pipeline processing, but can be much faster for certain search operations. 
 
-Both the above cases can be thought of as an extrapolation of
-PipelineTask- and Workflow-level provenance to the file level. The two
-cases are not mutually exclusive (ie. they could both be persisted). In
-fact the methods for exploiting the information can be left to the
-users, so long as the relational information is systematically stored.
+Both the above cases can be thought of as an extrapolation of PipelineTask- and Workflow-level provenance to the file level.
+The two cases are not mutually exclusive (ie. they could both be persisted).
+In fact the methods for exploiting the information can be left to the users, so long as the relational information is systematically stored.
 
 What do we want?
 ----------------
@@ -475,11 +465,12 @@ What design do we have?
 
 There is no current design for implementing this. Three options would be:
 
--  “Burning it” into the file on write (on Butler Put)
--  Packaging it with the file on read/export (by the service publishing the file)
--  Saving relational information in the Butler registry and leaving the methodology for its retrieval/use/exploitation to the user.\ 
+- “Burning it” into the file on write (on Butler Put)
+- Packaging it with the file on read/export (by the service publishing the file)
+- Saving relational information in the Butler registry and leaving the methodology for its retrieval/use/exploitation to the user.
 
-An alternative to this approach would be to fulfil the spirit of the requirement by burning into the file a service call (eg. DataLink) that supplies the required provenance information. Metadata such as the run collection, dataId, and dataset type are not (currently) stored in persisted formats.
+An alternative to this approach would be to fulfil the spirit of the requirement by burning into the file a service call (eg. DataLink) that supplies the required provenance information.
+Metadata such as the run collection, dataId, and dataset type are not (currently) stored in persisted formats.
 
 The filename should not be relied to for provenance lookup since it may be changed by the user and furthermore the filenames alone cannot be relied on because they are not unique to a specific processing attempt of a given product.
 
@@ -498,10 +489,16 @@ What is the state of implementation?
 
 Not currently implemented.
 
+We are concerned that data processing and imminently data-taking is underway prior to a system to record this provenance information is in existence. 
+
 Recommendations
 ---------------
 
--  [REC-FILE-1] Serialised exported data products (FITS files in the requirements) should include file metadata (eg. FITS header) that allows someone in possession of the file to come to our services and query for additional provenance information for that artifact (eg pipeline-task level provenance).
+-  [REC-FIL-1] Serialised exported data products (FITS files in the requirements) should include file metadata (eg. FITS header) that allows someone in possession of the file to come to our services and query for additional provenance information for that artifact (eg pipeline-task level provenance).
+
+- [REC-FIL-2] A study should be made of the possibility of embedding a DataLink or other service pointer in the FITS header in lieu of representing the provenance graph in the file
+
+- [REC-FIL-3] Irrespective of ongoing design discussions, every attempt should be made to capture information that could later be used to populate a provenance service. 
 
 
 Source-level provenance
