@@ -507,67 +507,79 @@ Recommendations
 Source-level provenance
 =======================
 
+By source-level provenance we mean astronomical sources in catalogs (sources, objects, etc). For simplicity we use "Source ID" in this section to mean the appropriate identifier of any source-like product (DIAsource, DIAObject, Object, etc)
+
 What do we want?
 ----------------
 
-`DMTN-085 <http://dmtn-085.lsst.io>`__ (report of the QA working group) implies that there is no strong requirement for pixel level per-source/object provenance beyond an association with the dataset from which the source measurement was derived.
-With the move away from multifit, the need for more has been reduced. However, there are per-source metadata that need to be propagated to the final data release product. Though not comprehensive, two of the metadata items that can be called out concretely are flags and footprints.
+We agree with `DMTN-085 <http://dmtn-085.lsst.io>`__ (report of the QA working group) that there is no strong requirement for pixel level per-source/object provenance beyond an association with the dataset from which the source measurement was derived since  we are no longer using the multifit approach (and its multiple source simultaneous source model fitting approach).
 
-Flags include information about the source detection quality, e.g., were there saturated pixels in the detection. These flags should also carry information about the process including which objects were used for astrometric and photometric calibration, PSF modeling, and which sources
-are injected fakes.
+However, there are per-source metadata that need to be propagated to the final data release product.
+The two that we have identified are flags and footprints.
 
-A footprint is a description of which pixels were used to compute measurements on the source/object.
-Because current deblending algorithms may distribute flux from a single pixel among multiple footprints, per source/object heavy footprints (pixel indices as well as flux values) are needed as well as the lightweight ones (pixel indices only).
-Footprints can also be used to query an image for the pixel level mask flags.
+Flags include boolean information about the source detection quality, e.g., were there saturated pixels in the detection.
+Flags can also be used to capture processing information such as which objects were used for astrometric calibration, photometric calibration, PSF modeling, and whether a source is an injected fake. 
 
-Note: as things stand, if we have an object ID (as opposed to a Source ID) derived from a deep coadd, the provenance only refers to a coadd from a given Data Release and not an arbitrary processing run, as DataID and Run are not embedded in the Object ID.
+A footprint identifies which pixels were used to compute measurements on the source/object.
+Because current deblending algorithms may distribute flux from a single pixel among multiple footprints, there are actually two types of footprint:
+
+- Per source/object heavy footprints (pixel indices as well as flux values)
+- Per source/object (lightweight) footprints (pixel indices only).
+
+Pixel-level mask flags can be retrieved using an individual footprint.
+
 
 What design do we have?
 -----------------------
 
-`DMTN-083 <http://dmtn-083.lsst.io>`__ is a discussion document on this topic that is relevant (though it predates the Gen3 Butler design and some sections have been superseded by events).
+Source-level provenance has previously been discussed in `DMTN-083 <http://dmtn-083.lsst.io>`__ but it predates the Gen3 Butler design and some sections have been obsolesced by the current baseline.
 
-The DPDD explicitly provides 64 bits for source flags and 128 bits for object flags.
-There is no formal documentation allowing for distributions of footprints in any format.
+The DPDD explicitly allows up to 64 bits for source flags and 128 bits for object flags.
+Footprints are not enumerated by the DPDD, although it is assumed that they will be provided in some form with our catalogs. 
 
 What data paths do we have?
 ---------------------------
 
-The Source ID is the key to raw provenance information, but there is no key to provenance to the image from which the measurement was made beyond its association with a data release; in other words, a Source ID has meaning only in the context of a data release; its Source ID points to the raw exposure; and data release information can be used to identify the specific PVI of origin. The Object ID can similarly trace back to a patch in a coadd, but release information must be used to identify a specific coadd given a processing run.
-[Note there are only enough bits reserved in the Object ID to encode 16 data releases]
+The Source ID encodes certain provenance information, including having 4 bits available to associate a source with a specific Data Release.
+This means that only 16 Data Releases can be recorded.
+The Source ID by itself does not encode any provenance information relating to a specific (re-)run; this information is available in the collection created by that (re-)run. 
+Similarly for the ObjectID. 
 
-The current intermediate catalog objects store flags as independent bits that can be returned directly. They also have information about the footprints and, given an image to operate on, can construct a heavy footprint (though I’m not sure if they provide the weighting necessary to return the exact heavy footprint computed by scarlet).
-When persisted to FITS files on disk, the catalogs pack the flags in a single integer and the footprints are stored as collections of spans (boundaries of contiguous blocks of pixels along rows) in a binary table extension. The flag and footprint information is reconstituted into a source catalog on read.
+Provenance for flags and footprints is accessible via the Source ID associated with that footprint or flag.
 
-Note that scarlet in particular should be deterministic, but in the case of algorithms that (for example) use a random seed we would also need to preserve those for reproducibility.
+Our source fitting algorithm (Scarlet) is deterministic; in any situation where an algorithm with a (for example random) seed is used, the seed should be preserved in the provenance metadata.
 
-Additional points
-
--  Jim points out we have some less-than-ccd more-than-source level data such as healpix mapped seent data
-
+We also have some data that is smaller than a CCD but bigger than a source, such as healpix-mapped seeing data.
+We have not considered here the provenance needs of such aggregated synthetic data. 
 
 What is the state of implementation?
 ------------------------------------
 
-Source/Object ID generation is available in general but needs to be revisited for LSSTCam due to its longer IDs.
+Source/Object IDs are being generated, although it is not clear to us whether:
+
+1. They are compliant with what the DPDD describes
+2. Whether the 64-bit sourceIDs specified in DPDD are sufficient 
 
 Measurement algorithms produce flags and footprints already.
-It seems that 64 bits for source flags and 128 bits for object flags should be sufficient, but a
-census of flags currently produced and planned should be made to confirm this concretely.
+
+The DPDD specifies 64 bits for source flags and 128 bits for object flags.
+We are not aware of an analysis that confirms that these are sufficient.
 
 Though the footprints are computed as part of processing, and are persisted as intermediate products, there is no implementation for providing them to end users (they are available directly through the butler in gen 3).
-There is general recognition that footprints are useful and lightweight enough that they should be provided (they are also taken into account in the sizing model), however heavy footprints have not been afforded the same attention and are much larger to store.
-Providing heavy footprints in any way other than by generating them on the fly would have a significant impact on the sizing model.
+
+Heavy footprints are not in the sizing model or the DPDD. *fact check*
 
 Recommendations
 ---------------
 
--  Perform a census of produced and planned flags to ensure that 64 bits for sources and 128 bits for objects is sufficient with some margin (20%?). This activity should also be carried out for DIASources and DIAObjects.
--  We are concerned that record identifiers are, at least in some cases, not long enough to hold all the necessary provenance information and the data release identifier. The recommendation is to revisit this and consider options for mitigating this shortcoming. For any record it should be possible to recover, at a minimum, the unique id for the record among data of the same type, the id of the immediate parent in the processing and the state of the software (data release) given nothing but the integer record identifier.
--  A formal mechanism for delivering footprints to end users should be architected as soon as is reasonable. Ideally, these would be stored with the catalog data so that the two could be retrieved together without needing to rendezvous results from a catalog query and a butler query. Storing spans in CCD, patch, etc. coordinates as JSON blobs seems like a reasonable approach
--  Some mechanism for storing and making available heavy footprints should be architected as soon as is reasonable. The recommendation is that heavy footprints be stored as fractional flux per pixel of the parent image. These should be compressible and can be stored at the CCD, patch, etc. level. They may only be available via the butler with an appropriate parent data ID. We leave it to the project to carry out a trade study to determine whether it is possible to store these for the entire survey or just a representative area for debugging purposes.
+- [REC-SRC-001] Perform a census of produced and planned flags to ensure that 64 bits for sources and 128 bits for objects is sufficient within a generous margin of error. This activity should also be carried out for DIASources and DIAObjects source IDs.
 
-*we should write up a recommendation on the worries about the width of the IDs, especially the “data release” field; we should complete the “census of flags” mentioned above; we also need a recommendation to address the “heavy footprint”issue - perhaps to a) devise a technical solution for going from sources in a database to obtaining their heavy footprint, and \*separately\* b) decide whether or not to apply this for full data releases or only subsets saved for validation purposes*
+- [REC-SRC-002] We are concerned that merely encoding a 4-bit data release provenance in a source does not scale to commissioning needs and the project should decide whether it is acceptable for additional information beyond the source ID to be required to fully associate a source with a specific image.
+
+- [REC-SRC-003] More generally, a study should be conducted on whether 64 bit source IDs are sufficient
+
+- [REC-SRC-004] Although not provenance-related, we recommend that the DPDD be updated to clearly state whether footprints and heavy footprints are to be provided.
+
 
 Metrics-level provenance
 ========================
