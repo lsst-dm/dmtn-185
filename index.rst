@@ -253,35 +253,37 @@ For example these could be wavefront sensing configurations, camera readout para
 What design do we have?
 -----------------------
 
+This does not have any bearing on what camera are doing.  Tiago has suggested we might want to add what they do, but neither of us know what they do, so it would require us tagging up from someone on that team.
+
 -  Software version
 
    -  DM -- All software is versioned via git and SHA1 hashes. There is also a release versioning system. The release versioning is not semantic.
 
-   -  T&S -- All software is versioned via git and SHA1 hashes. Release versions of the SAL code is handled by ?? [KSK]
+   -  T&S -- All software is versioned via git and SHA1 hashes. Semantic versioning is applied.  With the person releasing the software determining whether to bump major, minor or patch release.  Follow git flow merge dev branch to default branch and tag.
 
 -  Container versions
 
    -  DM -- Container images are produced and uploaded to a container repository like DockerHub. As with software the containers have an associated unique hash so they can be identified. The Dockerfile used to produce the images is versioned via git, however, I’m unsure if there is a mechanism for matching up a given image with a git revision of a Dockerfile.
 
-   -  T&S -- As in DM container images are uploaded to a container repository and images have a unique hash for identification. KSK] I’m unsure how Dockerfiles are versioned in T&S. I assume it’s git.
+   -  T&S -- As in DM container images are uploaded to a container repository and images have a unique hash for identification. Docker files used in deployment are put in a single repository.  These are versioned using cycle versions rather than release versions.  The cycle is determined by SAL and salobj versions.
 
 -  Software Configuration
 
    -  DM -- In DM, software configuration for the algorithms is handled by the configuration system of the pipeline tasks. This is discussed more in the PipelineTask provenance section. Configuration of many of the DM services is handled via a GitOps workflow mediated by the ArgoCD tool.
 
-   -  T&S -- [KSK] I do not know how software configuration is handled in T&S
+   -  T&S -- Configuration as code.  All configurations are git repos and versioned as code.  These are treated as code dependencies.
 
 -  System Configuration
 
    -  DM -- By definition, there is little in the way of system configuration in DM. The computing hardware will have some configuration. Perhaps that will be captured in the processing metadata
 
-   -  T&S -- [KSK] I do not know how system configuration is handled in T&S. E.g. how are the voltages on the camera set? Of course much of this information is captured in the telemetry stream but how configuration is versioned, stored and applied is not clear to me
+   -  T&S -- The camera team takes care of the system configuration.  There is lots of stuff that is not managed at all.  It comes with configuration and just sits there ticking away.  AuxTel is a little better since they have access to some of the components.[KSK] I do not know how system configuration is handled in T&S. E.g. how are the voltages on the camera set? Of course much of this information is captured in the telemetry stream but how configuration is versioned, stored and applied is not clear to me
 
 -  Schema evolution
 
    -  DM -- Schemas for the data products are stored in git and are versioned like other software. Of course, versioning of the schema does not capture when it was applied to the running database instances, so there could be room for a recommendation with that. Schema for services are versioned by the avro/kafka schema migration machinery.
 
-   -  T&S -- The message schemas are tightly controlled via XML documents that are versioned in git. They have a very strict release process that rolls out changes in the schema to running CSCs as a synchronized event (I believe). [KSK] I’m unaware of other schemas in the T&S sub-system that require provenance.
+   -  T&S -- The message schemas are tightly controlled via XML documents that are versioned in git. They have a very strict release process that rolls out changes in the schema to running CSCs as a synchronized event.
 
 What data paths do we have?
 ---------------------------
