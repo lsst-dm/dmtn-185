@@ -229,31 +229,40 @@ Software-level provenance
 We define software-level provenance as the type of provenance information that:
 
 1. Records the names and versions of the software that were participants in the system state of interest; for example “what were the camera readout parameters at the time this observation was taken”
-2. (Ideally, when possible) makes these available in a way that would allow the system to be reconfigured back to that state.
+2. Could make these available in a way that would allow the system to be reconfigured back to that state.
 
-Relevant systems include the configuration of summit systems at the time of data taking, or the versions of science pipeline packages at the time of data processing.
-
-In reality, this means we need several systems to capture provenance of the various contexts relevant to software:
+Therefore in scope to this section is data and metadata that would allow the reproduction of a previous state of the software systems of the observatory, including:
 
 -  Software versions
 -  Container versions
 -  Software configuration
 -  System configuration: e.g. voltages
--  Schema evolution
+-  Schema evolution management
 
-All of these contexts are relevant to multiple subsystems in the project. For the purposes of this document we refer to two specific subsystems: Data Management (DM) and Telescope and Site (T&S).
-T&S is intended to mean all software related to the physical instruments, the building, any test stands or auxiliary instrumentation, and infrastructure systems like HVAC regardless of actual WBS breakdown.
-
+   
 What do we want?
 ----------------
 
-We want to know (and be able to reproduce) what telescope and instrument software versions were deployed when data taking occurred.
-For example these could be wavefront sensing configurations, camera readout parameters, pointing models etc. 
+In this section we have drawn our examples from Data Management and the Telescope & Site groups as these are more familiar to the committee but our recommendations apply to all contributing software systems (including Camera, Facilities etc).
+
+In these contexts we want to know (and be able to reproduce) what telescope and instrument software versions were deployed when data taking occurred (such as wavefront sensing configurations, camera readout parameters, pointing models etc).
+
+Similarly we want to know the contributing code and dependencies that went into the production of a sepcific data product. 
 
 What design do we have?
 -----------------------
 
-This does not have any bearing on what camera are doing.  Tiago has suggested we might want to add what they do, but neither of us know what they do, so it would require us tagging up from someone on that team.
+OSS-REQ-0122 specifies that the Data Management system will record provance of all its processing activities including software versions and hardware and operating system configurations used. 
+
+*We don't know of any equivalent for Camera, T&S* 
+
+In some cases we have developed software build/test/deploy chains that in practice guarantee a level of reproducibility (eg automated tagging of artifacts and a guarantee that the same tag cannot not be applied to two different artifacts).
+
+What data paths do we have?
+---------------------------
+
+Data paths to infromation that would lead to being able to recover a previous state of the system differs. Some examples are:
+
 
 -  Software version
 
@@ -275,77 +284,37 @@ This does not have any bearing on what camera are doing.  Tiago has suggested we
 
 -  System Configuration
 
-   -  DM -- By definition, there is little in the way of system configuration in DM. The computing hardware will have some configuration. Perhaps that will be captured in the processing metadata
+   -  DM -- For data processing, see PipelineTask-level Provenance Section.
 
-   -  T&S -- The camera team takes care of the system configuration.  There is lots of stuff that is not managed at all.  It comes with configuration and just sits there ticking away.  AuxTel is a little better since they have access to some of the components.[KSK] I do not know how system configuration is handled in T&S. E.g. how are the voltages on the camera set? Of course much of this information is captured in the telemetry stream but how configuration is versioned, stored and applied is not clear to me
+   -  T&S -- The camera team takes care of the system configuration. We have not been able to determine what the extent of unaptured configuration is for summit systems as a whole.
 
 -  Schema evolution
 
-   -  DM -- Schemas for the data products are stored in git and are versioned like other software. Of course, versioning of the schema does not capture when it was applied to the running database instances, so there could be room for a recommendation with that. Schema for services are versioned by the avro/kafka schema migration machinery.
+   -  DM -- Schemas for the data products are stored in git and are versioned like other software. In some cases the build/test/deploy chains package the schema with software in containers, providing reprodicibility thrugh that route. In some cases schema for services are versioned by the avro/kafka schema migration machinery.
 
-   -  T&S -- The message schemas are tightly controlled via XML documents that are versioned in git. They have a very strict release process that rolls out changes in the schema to running CSCs as a synchronized event.
+   -  T&S -- The message schemas are tightly controlled via XML documents that are versioned in git. They have a very strict release process that rolls out changes in the schema to running CSCs as a synchronized event. The Butler does not have a requirement to downgrade to previous schemas. 
 
-What data paths do we have?
----------------------------
-
-In some cases data paths are either not determined or cannot be guaranteed to be correct.
-For example, a concern would be that firmware is being updated “by hand” and that there is no way to “put a system back” to a specific state (eg during a particular testing run) because
-it is not known what firmware was loaded at the time.
+Note that versioning in itself is not a sufficient guarantor of reproducibility.
+For example, if some firmware does not have an embedded software version, or if that software version is manually updated, that can create situations were the same software version is assumed and/or reported, but in fact the code has changed.
 
 What is the state of implementation?
 ------------------------------------
 
-Discussions are underway between T&S and SIT-COM on scoping this problem.
+Some of these issues are being addressed by continuous improvements in build/test/deploy chains.
+
+We are not aware of any tests that verify the ability to recover previous system states in most systems. 
 
 Recommendations
 ---------------
 
-Questions related to recommendations:
+- [REC-SW-1] There are a number of extant versioning mechanisms in DM and T&S software environments. Care should be not proliferate those unreasonably, but to share software versioning and packaging infrastructure where possible, as these systems are hard to get right and the more teams use them, the more robust they tend to be.
 
--  Do we have a mechanism for matching up Dockerfile revisions with
-   docker images? Do we care? This is hierarchical because all
-   Dockerfiles start with a base image, so we’d want to match the
-   Dockerfile for the base image as well.
--  How does T&S do software versioning?
--  Are there kinds of software configuration other than algorithmic and
-   services?
--  How does T&S do software configuration?
--  How does T&S do system configuration?
+- [REC-SW-2] Individual systems should have explicit requirements addressing what, if any, demands there are to be able to recover a prior system state. When such requirements are needed, the systems should have to capture and publish in a machine-readable form version information that is necessary to fulfil those requirements. Such requirements should cover the need for data model provenance, eg. whether it is necessary to know when a particular schema was applied to a running system. 
 
-Actual recommendations:
+- [REC-SW-3] Software provenance support should include mechanisms for capturing the versions of underlying non-Rubin software, including the operating system, standard libraries, and other tools which are needed “below” the Rubin software configuration management system. The use of community-standard mechanisms for this is strongly encouraged.
 
--  [REC-SW-1] Software provenance should be captured in association with
-   “jobs” - units of execution. It should be possible to obtain software
-   provenance data starting with a job ID.
--  [REC-SW-2] Versions of Rubin-controlled software should be captured
-   using a small number of common mechanisms that each cover as broad a
-   set of packages as possible.
--  [REC-SW-3] Software provenance should be captured in a
-   machine-readable form which can be applied programmatically to
-   reconstruct in an executable state the software configuration of a
-   past execution. This does not imply an open-ended requirement to
-   reconstruct old configurations when underlying O/S changes and the
-   like have made that realistically infeasible.
--  [REC-SW-4] For as long as ‘eups’ is the principal tool for
-   configuration management for the Science Pipelines software, software
-   provenance for that software should be maintained in an
-   ‘eups’-compatible form.
--  [REC-SW-5] Software provenance support should include mechanisms for
-   capturing the versions of underlying non-Rubin software, including
-   the operating system, standard libraries, and other tools which are
-   needed “below” the Rubin software configuration management system.
-   The use of community-standard mechanisms for this is strongly
-   encouraged.
--  Containers should be used wherever is reasonable. This particularly
-   applies to services or CSCs. They are easy to version and aid in
-   repeatability by containing more than just version information such
-   as configuration and system state.
--  A system for recording when versioned schema are applied to the
-   running systems should be available
--  A census of services in both DM and T&S should be conducted. For any
-   services that are not running in the, now standard, service
-   infrastructure: i.e. kubernetes and argoCD for deployment, a specific
-   explanation of why a migration is not necessary should be provided
+- [REC-SW-4] Containerization offers significant and tangible advantages in software reproducibility for a modest investment in build/deploy infrastructure; it should be preferred wherever possible for new systems, and systems that predate the move to containerization should be audited to examine whether there is a reasonable path to integrate them to current deployment practices.
+
 
 PipelineTask-level provenance
 =============================
