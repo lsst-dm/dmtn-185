@@ -157,8 +157,6 @@ The general approaches and notional designs seem reasonable, though there remain
 
 -  [REC-EXP-1]
 
-
-
 Telemetry-level provenance
 ==========================
 
@@ -167,41 +165,39 @@ By “telemetry-level provenance” we mean associating observatory telemetry wi
 What do we want?
 ----------------
 
-Fundamentally we need to capture the instantaneous state of the system and what conditions it is operating in for situational awareness and to ensure appropriate and responsible scientific rigorousness in data recording.
+We need to capture the instantaneous state of the system and what conditions it is operating in for situational awareness and to ensure appropriate and responsible scientific rigorousness in data recording.
 This includes a complete picture of the states of all the subsystems, and the surrounding observatory environment (including the aspects of the visible sky, e.g. transmission, brightness).
 For telemetry values we would like to capture their origin, including properties (including software versions) of the CSCs (Commandable Software Components) that produced them. 
 
-A separate record of maintenance and other changes in the hardware is made in a separate MMS (maintenance management system) database and personnel notes and observations are recorded in the observatory-wide logging system.
+A separate record of maintenance and other changes in the hardware is made in a separate MMS (maintenance management system) database and should be retrievable by API to observatory reporting systems. 
+Personnel notes and observations are recorded in the observatory-wide logging system.
 
 What design do we have?
 -----------------------
 
-The EFD is designed to capture any time-series information accompanying
-telemetry values in a DDS topic. (`SQR-29 <http://sqr-029.lsst.io>`__)
-The Large File Annex (LFA) stores and archives larger (array) data
-files, such as all-sky camera images, webcam images (or movies), and
-input maps for the scheduler to be used in real-time or offline
+The EFD is designed to capture any time-series information accompanying telemetry values in a DDS topic. (`SQR-29 <http://sqr-029.lsst.io>`__)
+The Large File Annex (LFA) stores and archives larger (array) data files, such as all-sky camera images, webcam images (or movies), and input maps for the scheduler to be used in real-time or offline
 analyses.
 
-Both the OWL and MMS are still under design.
+Both the Observatory Logging Ecosystem (OLE)  and MMS are still under design.
 
 What data paths do we have?
 ---------------------------
 
-Desired provenance data can be inserted and acquired via the SAL XML
-interface, eg. https://ts-xml.lsst.io/sal_interfaces/ATCamera.html#softwareversions
-The LFA is currently implemented as a local S3 service on the summit and will be synced to the USDF regularly (VERIFY THIS), so can be easily added to as more systems are brought online.
-Observatory human logging including operator comments (for both timely and offline annotation of images and miscellaneous temporal events), in a dedicated database, and shall be accessible via RSP.
-Similarly any hardware changes across the observatory are recorded in a separate Maintenance Management System (MMS) database which is still under construction.
-At the very least, if there is not an on-demand API data stream access, this system shall have regularly exported YAML (or equivalent) data files with all relevant hardware change/alarm/status events (and attributable details).
-This will be available for ingestion and assimilation by users at the RSP.
+Desired provenance data can be inserted and acquired via the SAL XML interface, eg. https://ts-xml.lsst.io/sal_interfaces/ATCamera.html#softwareversions
+The LFA is implemented as a local S3 service on the summit and will be synced to the USDF at some cadence, and additional artifacts can be added to it.
+The Camera Control System Database is a source of telemetry information, all of which is not published to the SAL and hence only a subset is captured in the EFD. 
+Observatory human logging including operator comments (for both timely and offline annotation of images and miscellaneous temporal events), in a dedicated database, and shall be accessible via the Science Platform. 
+Similarly any hardware changes across the observatory are in principle recorded in a separate Maintenance Management System (MMS) database which is still under construction.
+
 
 What is the state of implementation?
 ------------------------------------
 
 The software architecture is mature and in production.
 However only a minority of CSCs publish all this information at this time.
-More CSCs are being added all the time as missing relevant aspects are being identified (e.g. seismic sensors, GIS, HVAC) and will likely continue into operations.
+More CSCs are being added all the time as we discover data gaps (e.g. seismic sensors, GIS, HVAC) and will likely continue into operations.
+Any new CSCs should have provenance requirements explicitly stated (eg publishing their firmware version along with their telemetry) as makes sense for the CSCs in question. 
 
 Data will be accessed by the users by multiple use-cases.
 
@@ -209,7 +205,9 @@ Data will be accessed by the users by multiple use-cases.
 -  scientists/external users via notebook aspect database access or butler if the associated telemetry is identified as critical information to an exposure
 -  LFA data shall be accessible via RSP either through direct raw data access or via a specific butler or butler-like ingestion method if deemed necessary for the project and/or community.
 
-Areas of concern focus on identifying all relevant aspects of the system and recording them in the EFD. A standard way (salobj) of implementing CSCs has improved the process somewhat. The MMS and OWL implementation is uncertain whether they will meet all provenance needs.
+Areas of concern focus on identifying all relevant aspects of the system and recording them in the EFD.
+A standard way (salobj) of implementing CSCs has improved the process and templating and other ways of streamlining CSC implementation would help considerably in providing a robust provenance implementation.
+Systems under evolving design (eg. MMS, OLE/OWL) should explicitly address any provenance-related reporting requirements.
 
 .. image:: Pictures/10000201000005000000027EE5DCFF60E7C8F918.png
    :width: 6.5in
@@ -218,8 +216,9 @@ Areas of concern focus on identifying all relevant aspects of the system and rec
 Recommendations
 ---------------
 
--  [REQ-TEL-001]   
-
+- [REQ-TEL-001] Invstigate ways to expose all information in the Camera Control System Database to the EFD.
+- [REQ-TEL-002] The MMSs should have ideally an API and at the very least a machine-readable export of data that would allow its data to be retrieved by other systems. 
+- [REQ-TEL-003] Any new CSCs (and wherever possible any current CSCs that lack them) should have requirements on what provenance information they should make available to SAL so it cat be associated with their telemetry. 
 
 
 Software-level provenance
