@@ -253,7 +253,7 @@ What design do we have?
 
 OSS-REQ-0122 specifies that the Data Management system will record provance of all its processing activities including software versions and hardware and operating system configurations used. 
 
-*We don't know of any equivalent for Camera, T&S* 
+LIT-151 requested that the above requirement not be limited to Data Management, but no action was taken. 
 
 In some cases we have developed software build/test/deploy chains that in practice guarantee a level of reproducibility (eg automated tagging of artifacts and a guarantee that the same tag cannot not be applied to two different artifacts).
 
@@ -308,31 +308,35 @@ Recommendations
 
 - [REC-SW-1] There are a number of extant versioning mechanisms in DM and T&S software environments. Care should be not proliferate those unreasonably, but to share software versioning and packaging infrastructure where possible, as these systems are hard to get right and the more teams use them, the more robust they tend to be.
 
-- [REC-SW-2] Individual systems should have explicit requirements addressing what, if any, demands there are to be able to recover a prior system state. When such requirements are needed, the systems should have to capture and publish in a machine-readable form version information that is necessary to fulfil those requirements. Such requirements should cover the need for data model provenance, eg. whether it is necessary to know when a particular schema was applied to a running system. 
+- [REC-SW-2] All systems should have individual explicit requirements addressing what, if any, demands there are to be able to recover a prior system state. When such requirements are needed, the systems should have to capture and publish in a machine-readable form version information that is necessary to fulfil those requirements. Such requirements should cover the need for data model provenance, eg. whether it is necessary to know when a particular schema was applied to a running system. 
 
 - [REC-SW-3] Software provenance support should include mechanisms for capturing the versions of underlying non-Rubin software, including the operating system, standard libraries, and other tools which are needed “below” the Rubin software configuration management system. The use of community-standard mechanisms for this is strongly encouraged.
 
 - [REC-SW-4] Containerization offers significant and tangible advantages in software reproducibility for a modest investment in build/deploy infrastructure; it should be preferred wherever possible for new systems, and systems that predate the move to containerization should be audited to examine whether there is a reasonable path to integrate them to current deployment practices.
 
 
+
 PipelineTask-level provenance
 =============================
 
-PipelineTask-level provenance is the lowest level of provenance available through the LSST Science Pipelines without adding dedicated provenance-recording logic directly into the algorithmic code.
-The middleware provides no means of automated detection and recording of provenance at the Task level, for Tasks contained in PipelineTasks.
-Nor do we record sub-Task-level pixel arithmetic operations, such as recording that a dataset is the result of a subtraction between two antecedent exposures and then a multiplication, so for example data manipulated in a Science Platform notebook will not provide provenance as the design currently stands.
+By PipelineTask provenance we mean information that is available in the Data Management middleware framework; PipelineTasks are the highest level building blocks from which data processing pipelines are constructed.
 
-PipelineTask-level provenance, by contrast, is available “for free” from the design of the Gen3 middleware system, where inputs and outputs are mediated by the Butler and all PipelineTasks are executed by core Gen3 code.
-
-The natural level of provenance-recording by this system will associate datasets, identified by DataId and type, and the collection in which they occur, with the PipelineTasks that produced them, identified by name and class, and the as-executed values of their configuration
-objects.
-
-Note that the system is only capable of recording that a given input was presented to a PipelineTask, not that the data in that input was actually used in the generation of the final result (e.g., it might fail a quality cut and not in fact be included in a coadd).
-
-Additionally, it appears *(needs confirmation)*\ that as-executed lists of package versions, and physical dataset locators *(URIs?)* are recorded by the command-line activator (pipetask in ctrl_mpexec).
 
 What do we want?
 ----------------
+
+**GPDF to add requirements prior art**
+
+PipelineTask-level provenance is the finest grained provenance available through the LSST Science Pipelines without adding dedicated provenance-recording logic directly into the algorithmic code.
+We believe this granularity is sufficient for reproducibility and traceability, and since the inputs and outputs are mediated by the Butler and all PipelineTasks are executed by core Gen3 code, robustness is high. 
+
+This system will associate datasets, identified by DataId and type, and the collection in which they occur, with the PipelineTasks that produced them, identified by name and class, and the as-executed values of their configuration objects.
+
+The system records that a given input was presented to a PipelineTask, not that the data in that input was actually used in the generation of the final result (e.g., it might fail a quality cut and not in fact be included in a coadd). This is the correct approach in order to achieve reproducibility of previously executed pipeline steps. 
+
+**Check with Tim**
+
+Additionally, it appears *(needs confirmation)*\ that as-executed lists of package versions, and physical dataset locators *(URIs?)* are recorded by the command-line activator (pipetask in ctrl_mpexec).
 
 Provenance capture
 ^^^^^^^^^^^^^^^^^^
@@ -342,10 +346,12 @@ For a given output dataset of a PipelineTask we want to capture:
 1. The specific versions of the PipelineTask stack that were run to create it;
 2. The computing environment within which it was run;
 3. The specific configuration (pex_config) that was applied, after the “stacking up” of all defaults and overrides;
-4. The input datasets presented to the PipelineTask that generated the output, ideally named in both site-independent and physical forms;
-5. Any QA metrics that were generated “in situ” as part of the calculational work of the PipelineTask;
-6. Logs and/or other outputs to indicate success/failure performance, etc.
+4. The input datasets presented to the PipelineTask that generated the output, ideally named in both site-independent (DataID) and physical forms (URIs);
+5. Any QA metrics that were generated “in situ” as part of the calculational work of the PipelineTask (see Metrics-Level Provenance)
+6. Logs and/or other outputs to indicate success/failure performance, etc. (see Log-Level Provenance)
 
+For (4), we want the URIs in order to be able to disambiguate between eg. data products that have been produced at different Data Facilities with the same computed DataIDs. 
+   
 Provenance utilization
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -372,6 +378,10 @@ What design do we have?
 
 `LDM-152 <http://ldm-152.lsst.io>`__ specifies that the configuration and inputs to PipelineTasks are preserved.
 
+
+Task-level provenance has previously been discussed in `DMTN-083 <http://dmtn-083.lsst.io>`__ but it predates the PipelineTask design and some sections have been obsolesced by the current baseline.
+
+
 What data paths do we have?
 ---------------------------
 
@@ -381,20 +391,29 @@ In the design, the executor stores the quantum graph in the Butler in a form tha
 What is the state of implementation?
 ------------------------------------
 
-(1) and (2) are stored and queryable by the Butler API while (3) is not yet implemented but is planned.
+From the list above, (1) and (2) are stored and queryable by the Butler API while (3) is not yet implemented but is planned.
 
 VO access to this information via ProvDAL is not planned in construction.
 
-Recommendations (Below is an attempt to “finish off” this section)
+Recommendations
+---------------
 
--  Item (3), the configuration used in a re-run should be trace-able (like the software version).
--  At the very least the quantum graph should be stored as it expresses the relationship between the inputs and outputs and tasks (within the context of a given software stack and configuration).
--  The tools to query such provenance can be left to the user (presumably DM/OPS staff would build these as needed/warranted).
+- [REQ-PTK-001] As planned, complete the recording of as-executed configuration for provenance
+
+- [REQ-PTK-002] As planned, comlete the storage of the quantum graph for each execute Pipeline in the Butler repository
+  
+- [REQ-PTK-003] Code and command-line support for recomputing a specified previous data product based on stored provenance information should be provided
+
+- [REQ-PTK-004] A study should be made on whether W3/VO provenance ontologies are a suitable data model either for persistence or service of provenance to users. 
+
+- [REQ-PTK-005] URIs (as well as DataIDs) should be recorded in Butler data collections
+
+
 
 Workflow-level provenance
 =========================
 
-Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system (such as software version provenance) are handled by Task-Level provenance.\ *(Verify with Middleware - this would make it a requirement on any activator)*
+Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system (such as software version provenance) are handled by PipelineTask-Level provenance.\ *(Verify with Middleware - this would make it a requirement on any activator)*
 This is also an effect of the design where there are elements of the Science Pipelines (specifically pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
 
 There is metadata associated with workflow (such as log messages generated during a particular run and the configuration of the execution node itself), but there is no provenance tree associated with them.
@@ -402,7 +421,7 @@ There is metadata associated with workflow (such as log messages generated durin
 Need a discussion of resource-usage information here as well - since this has site-dependent aspects.
 
 `LSE-30 <http://ls.st/lse-30>`__ does require operating system and
-hardware provenance to be recorded. This could be done at workflow-level provenance, but given the lack of requirement at this level it might be simpler to just add this information to task-level provenance (where the OS is already recorded but not the version).
+hardware provenance to be recorded. This could be done at workflow-level provenance, but given the lack of requirement at this level it might be simpler to just add this information to PipelineTask-level provenance (where the OS is already recorded but not the version).
 
 Recommendations
 ---------------
@@ -452,7 +471,7 @@ The unanswered question is whether there are cases where such file level provena
 What data paths do we have?
 ---------------------------
 
-The information is known as part of the Task-Level provenance above.
+The information is known as part of the PipelineTask-Level provenance above.
 
 What is the state of implementation?
 ------------------------------------
