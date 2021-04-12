@@ -102,27 +102,24 @@ What do we want to know?
 Given an exposure that was taken at the telescope, we want to trace: 
 
 1. the state of the observatory during the observation,
-2. the observing script (inc version) that was executed that caused this observation,
+2. the observing script (including version) that was executed that caused this observation,
 3. the science program and field name (data taking campaign) that this observation was taken as part of (e.g., survey, commissioning run, etc.)
-
-Then the next obvious state we need to trace at the exposure level is:
-
-1. any subsequent discoveries about the data quality that are deemed relevant (e.g., a previously undocumented event/condition, a new QA metric calculation, etc.)
-2. the subsequent processing and culling of data (see Metrics section below)
+4. Any lower grouping that is meaningful but not derivable by the observing script - for example, a flat belonging to a group of flats taken with the purpose to co-add a master flat
+5. Per-exposure ancillary data, eg. exposure quality flags/grades also should have its provenance recorded; for example if an observer or processing system marks an exposure as "bad", who did it, why and when should be discoverable. 
 
 What design do we have?
 -----------------------
 
 For (1) we have an extant design that allows that association of machine-readable data (specifically telemetry stored in the EFD) to be associated with an exposure using the start and end time of the exposure (see `DMTN-082 <http://dmtn-082.lsst.io>`__)
 
-For (2) there  is a discussion in\ `LTS-836 <http://ls.st/lts-836>`__ about how the observing scripts are processed by the observing queue.  [1/21: Needs confirmation that there is a design resulting from that discussion.]
-
+For (2) there is a discussion in\ `LTS-836 <http://ls.st/lts-836>`__ about how the observing scripts are processed by the observing queue.
 
 For (3) the design is that the scheduler adds an observation to the queue specifying campaign parameters (eg, survey field name); these parameters are forwarded to the Camera Control System (CCS) which ensures that they are written to the file header. [see discussion at `dmtn-058 <https://dmtn-058.lsst.io>`__]
 
-For (4) the logging working group produced a use-case for this [`LSE-490 <https://docushare.lsst.org/docushare/dsweb/Get/LSE-490/lse490_ElectronicLoggingSystemReport_rel1_20200925.pdf>`__], but it remains to be seen that this covers all situations where post-facto information is uncovered.
+For (4), we understand the OCS queue implementation allocates a unique identifier for each OCS queue submission that can serve as such.
 
-For (5) the design of the pipeline tasks keeps input run lists.
+For (5) the logging working group produced a use-case for this [`LSE-490 <https://docushare.lsst.org/docushare/dsweb/Get/LSE-490/lse490_ElectronicLoggingSystemReport_rel1_20200925.pdf>`__], but it remains to be seen that this covers all situations where post-facto information is uncovered.
+
 
 What data paths do we have?
 ---------------------------
@@ -133,29 +130,34 @@ For (2) information about the script should be recordable in the EFD as it is av
 
 For (3) the information should be retrievable from the Butler registry, the EFD, and the exposure table.
 
-For (4) exposure (human-entered) notes will be entered into a separate database [check this], the access to this database and potential ways to status/flag exposures needs to be revisited.
+For (4) the information is theoretically available from the Butler. 
 
-For (5) the input run lists are kept [where?]
+For (5) exposure (human-entered) notes will be entered into a separate database, the access to this database and potential ways to status/flag exposures needs to be revisited.
+
 
 What is the state of implementation?
 ------------------------------------
 
-For (1) we are capturing the relevant telemetry in the EFD. We are not currently constructing the exposure table but this work is planned. [1/21: note connection to ongoing discussions about how to build the exposure/visit tables envisioned in the DPDD, currently being discussed in the SDM-standardization meetings]
+For (1) we are capturing the relevant telemetry in the EFD. We are not currently constructing the exposure table but this work is planned.
 
 For (2) currently only the path to the observing script is being recorded and not generally retrievable.
 
 For (3) this information is not currently in the header. This work is planned.
 
-For (4) this information is being designed, the write interface is currently being implemented on both the backend (DB) and a front-end (LOVE). Read interface???
+For (4) the Butler is planning on recording this information but this has not been tested yet.
 
-For (5) run lists have been used for some time.
+For (5) this information is being designed, the write interface is currently being implemented on both the backend (OWL/OLE DB) and a front-end (LOVE).
 
 Recommendations
 ---------------
 
 The general approaches and notional designs seem reasonable, though there remain significant holes in the extant functionality. Following are the recommendations:
 
--  [REC-EXP-1]
+- [REC-EXP-1] As planned, program details known to the scheduler (such as science programme and campaign name) should be captured by the Butler
+- [REC-EXP-2] As planned, OCS queue submissions that result in meaningfully grouped observations should be identified as such in the Butler
+- [REC-EXP-3] Any system (eg. LOVE, OLE/OWL0 allowing the entering or modification of exposure-level ancillary data should collect provenance information on that data (who, what, why) 
+
+
 
 Telemetry-level provenance
 ==========================
@@ -501,7 +503,8 @@ What do we want?
 We agree with `DMTN-085 <http://dmtn-085.lsst.io>`__ (report of the QA working group) that there is no strong requirement for pixel level per-source/object provenance beyond an association with the dataset from which the source measurement was derived since  we are no longer using the multifit approach (and its multiple source simultaneous source model fitting approach).
 
 However, there are per-source metadata that need to be propagated to the final data release product.
-The two that we have identified are flags and footprints.
+The two that we have identified are flags and footprints
+
 
 Flags include boolean information about the source detection quality, e.g., were there saturated pixels in the detection.
 Flags can also be used to capture processing information such as which objects were used for astrometric calibration, photometric calibration, PSF modeling, and whether a source is an injected fake. 
