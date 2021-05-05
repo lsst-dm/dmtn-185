@@ -415,18 +415,30 @@ Recommendations
 Workflow-level provenance
 =========================
 
-Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system (such as software version provenance) are handled by PipelineTask-Level provenance.\ *(Verify with Middleware - this would make it a requirement on any activator)*
-This is also an effect of the design where there are elements of the Science Pipelines (specifically pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
+Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system, spedifically software version provenance, are handled by PipelineTask-Level provenance.
+This includes both pipeline software versions and third party package versions.
+Similarly, as opposed to some systems where a directed acyclic graph is described in some workflow specific language (or translated from the common workflow language), the source of primacy is the quantum graph computed by the pipeline task framework itself.
 
-There is metadata associated with workflow (such as log messages generated during a particular run and the configuration of the execution node itself), but there is no provenance tree associated with them.
-
-Need a discussion of resource-usage information here as well - since this has site-dependent aspects.
+The low level workflow system must be able to report details about how quantum graph was executed.
+Specifics are enumerated in the recommendations.
 
 `LSE-30 <http://ls.st/lse-30>`__ does require operating system and
 hardware provenance to be recorded. This could be done at workflow-level provenance, but given the lack of requirement at this level it might be simpler to just add this information to PipelineTask-level provenance (where the OS is already recorded but not the version).
 
 Recommendations
 ---------------
+
+- [REQ-WFL-001] Logs from running each quantum must be captured and made available from systems outside the batch processing system.
+
+- [REQ-WFL-002] Any workflow level configuration and logs must be persisted and made available from systems outside the batch processing system.
+  This information should be associatable with specific processing runs.
+
+- [REQ-WFL-003] Failed quanta must be reported including where in the batch processing system the quantum was running at the time of failure.
+
+- [REQ-WFL-004] Though no requirement exists, it should be possible to inspect, post-facto, the resource usage (CPU, memory, I/O etc) for individual workers.
+
+- [REQ-WFL-005] Both the OS and the OS version must be recorded.
+  This requirement may be met within the pipeline task provenance, but it is an upscope since currently, only the OS type is recorded.
 
 File-level provenance
 =====================
