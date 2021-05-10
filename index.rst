@@ -667,23 +667,30 @@ Log Provenance
 What do we want?
 ----------------
 
-Logs, i.e., machine-generated output from software and systems involved
-in data taking are sometimes necessary in order to understand unexpected
-behaviour. Log provenance shares most provenance requirement with
-metrics data, except for being a
+Logs, i.e., machine-generated output from software and systems involved in data taking are sometimes necessary in order to understand unexpected behaviour.
+Log provenance shares most provenance requirement with metrics data, except for being a blob rathen than a scalar. 
 
 What data paths do we have?
 ---------------------------
 
+As far as it is known, services and software systems log to STDOUT.
+Following RFC-767 we expect these to be timestamped in UTC where they are not already. 
 
 What is the state of implementation?
 ------------------------------------
 
+There is a patchwork of implementation in terms of curating and making searchable logs.
+Some systems do not dispatch to a central service, some do so to the summit's greylog system, some send to an ELK cluster at the IDF.
+There does not seem to be currently a centralised system for dispatching all eg. LDF logs to a single LDF log management cluster. 
 
 Recommendations
 ---------------
 
--  [REC-LOG-1]
+- [REC-LOG-1] Since time is the primary provenance element for a log entry, systems are to produce (or make searchable) in UTC.
+
+- [REC-LOG-2] Each site (summit, IDF, USDF, UKDF, FRDF) should provide a log management solution or dispatch to another's site log management service to aid log discoverability.
+
+- [REC-LOG-3] Individual systems should make clear log renention requirements. 
 
 Additional notes:
 =================
