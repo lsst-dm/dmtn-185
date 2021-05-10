@@ -46,7 +46,7 @@
 
 .. note::
 
-   **This technote is not yet published.**
+   **This report is not yet published. Comments are welcome on this draft**
 
    Report of the Provenance Working Group (2020-2021)
 
