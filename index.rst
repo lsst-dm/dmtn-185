@@ -55,7 +55,7 @@
 Introduction
 ============
 
-This document is the report of the Provenance Working Group charged through `LDM-722 <https://ldm-722.lsst.io>`__.
+This document is the report of the Provenance Working Group charged through :cite:`LDM-722`.
 The charge was to assess the provenance capabilities and uncaptured needs relating to the Gen3/Butler registry.
 
 As the Working Group was constituted with representation from DM, EPO and SIT-COM, we quickly established that it was less than ideal to consider Gen3 provenance in isolation, and we widened the net to include related systems to ensure there were no gaps in the whole-system’s ability to record provenance of interest.
@@ -359,7 +359,7 @@ Provenance utilization
 
 We want to be able to perform queries against the recorded provenance, such as “tell me which raws or which calexps contributed to this coadd” from the Butler (see figure for a visual aid).
 
-The above capture and query capability is reflected in DMS-MWBT-REQ-0094 & DMS-MWBT-REQ-0095 (`LDM-556 <http://ldm-556.lsst.io>`__) and ultimately flows down via LSE-61 from LSE-30 (OSS-REQ-0122) which requires that sufficient provenance is recorded that data products can be reproduced.
+The above capture and query capability is reflected in DMS-MWBT-REQ-0094 & DMS-MWBT-REQ-0095 (`LDM-556 <http://ldm-556.lsst.io>`__) and ultimately flows down via LSE-61 :cite:`LSE-61` from LSE-30 (OSS-REQ-0122) which requires that sufficient provenance is recorded that data products can be reproduced.
 
 We would like to have both code and command-line support for the operation “re-run, as exactly as possible, the processing that was used to generate dataset X”, based on stored provenance.
 This would, for instance, use the frozen “as-executed” configuration values as a 100% override to any default configuration values in the code used for the re-run.
@@ -415,8 +415,10 @@ Recommendations
 Workflow-level provenance
 =========================
 
+<<<<<<< Updated upstream
 Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system, spedifically software version provenance, are handled by PipelineTask-Level provenance.
-This includes both pipeline software versions and third party package versions.
+This includes both pipeline software versions and third party package versions and is an effect of the design where there are elements of the Science Pipelines (specifically  pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
+
 Similarly, as opposed to some systems where a directed acyclic graph is described in some workflow specific language (or translated from the common workflow language), the source of primacy is the quantum graph computed by the pipeline task framework itself.
 
 The low level workflow system must be able to report details about how quantum graph was executed.
@@ -711,9 +713,9 @@ Additional notes:
 - We should require a glpbal provenance key for all data curating provenance associating all curated artifacst with a time and if possible a data association. This is to allow collation of provenance curated by heterogenous systems. Original phrasing follows:  [REC-MET-004] As suggested by the QA Strategy Working Group (`DMTN-085 <https://dmtn-085.lsst.io/>`__), collections of related metric values should be stored in a format that can be efficiently queried and joined with survey metadata (e.g., telemetry, exposure id, survey property maps). This data store should be associated with the Data Butler.
 
 
-.. .. rubric:: References
+.. rubric:: References
 
 .. Make in-text citations with: :cite:`bibkey`.
 
-.. .. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
-..    :style: lsst_aa
+.. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
+    :style: plain
