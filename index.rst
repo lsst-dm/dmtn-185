@@ -648,7 +648,7 @@ Recommendations
 -  [REC-MET-001] For metrics that can be associated with a Butler dataId, the metrics should be persisted using the Data Butler as the source of truth. The dataId associated with the metric should use the full granularity
 -  [REC-MET-002] Any system that uses Butler data to derive metrics should persist them in the Butler provided that the metrics are associable with a Data ID
 -  [REC-MET-003] When lsst.verify.Job objects are exported, the exported object should included the needed information (run collection and dataId) to associate with the source of truth metric persisted with Data Butler
--  [REC-MET-004] A plan should be developed for persisting metrics that are not directly associated with non-Butler persisted metrics.
+-  [REC-MET-004] A plan should be developed for persisting non-Butler persisted metrics.
 - [REC-MET-005] Even if effort from implementation is not available in construction, we should develop a conceptual design for structured, semantically rich storage of metrics in the Butler
 
 
