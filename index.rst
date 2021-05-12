@@ -556,7 +556,7 @@ We are not aware of an analysis that confirms that these are sufficient.
 
 Though the footprints are computed as part of processing, and are persisted as intermediate products, there is no implementation for providing them to end users (they are available directly through the butler in gen 3).
 
-Heavy footprints are not in the sizing model or the DPDD. *fact check*
+Though heavy footprints are included in the sizing model, there is only passing mention of them in the DPDD.
 
 Recommendations
 ---------------
