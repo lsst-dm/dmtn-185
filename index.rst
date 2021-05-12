@@ -155,7 +155,7 @@ The general approaches and notional designs seem reasonable, though there remain
 
 - [REC-EXP-1] As planned, program details known to the scheduler (such as science programme and campaign name) should be captured by the Butler
 - [REC-EXP-2] As planned, OCS queue submissions that result in meaningfully grouped observations should be identified as such in the Butler
-- [REC-EXP-3] Any system (eg. LOVE, OLE/OWL0 allowing the entering or modification of exposure-level ancillary data should collect provenance information on that data (who, what, why) 
+- [REC-EXP-3] Any system (eg. LOVE, OLE/OWL) allowing the entering or modification of exposure-level ancillary data should collect provenance information on that data (who, what, why) 
 
 
 
@@ -210,10 +210,6 @@ Data will be accessed by the users by multiple use-cases.
 Areas of concern focus on identifying all relevant aspects of the system and recording them in the EFD.
 A standard way (salobj) of implementing CSCs has improved the process and templating and other ways of streamlining CSC implementation would help considerably in providing a robust provenance implementation.
 Systems under evolving design (eg. MMS, OLE/OWL) should explicitly address any provenance-related reporting requirements.
-
-.. image:: Pictures/10000201000005000000027EE5DCFF60E7C8F918.png
-   :width: 6.5in
-   :height: 3.2398in
 
 Recommendations
 ---------------
@@ -366,11 +362,6 @@ This would, for instance, use the frozen “as-executed” configuration values 
 This re-run capability is needed for validation as well as for use in “virtual data product re-creation” services.
 It will also be needed by Notebook Aspect users.
 
-.. image:: Pictures/100002010000050000000290F5389AC0A7C18C30.png
-   :width: 6.5in
-   :height: 3.3311in
-
-
 Additionally we would like a provenance web service to allow Science Platform users to perform these queries, such as the IVOA provenance ProvDAL service.
 
 We are not aware of any work that has been done to date on mapping the PipelineTask provenance to common community three-term ontologies for provenance such as the W3C or IVOA provenance models. However, the information content seems likely to have a fairly natural mapping.
@@ -463,7 +454,7 @@ What do we want?
 There are two relevant requirements in `LDM-556 <http://ldm-556.lsst.io>`__:
 
 1. Persisting provenance information with the raw data IDs that contributed to a dataset into the final export data format (be it FITS or alternative) (DMS-MWBT-REQ-0093)
-2. Same but with the immediate parents (eg in the diagram above, the parents of the Coadd pictured are the CalExps/PVIs) (DMS-MWBT-REQ-0093)
+2. Same but with the immediate parents (DMS-MWBT-REQ-0093)
 
 What design do we have?
 -----------------------
