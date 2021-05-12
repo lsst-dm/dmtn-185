@@ -406,7 +406,6 @@ Recommendations
 Workflow-level provenance
 =========================
 
-<<<<<<< Updated upstream
 Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system, spedifically software version provenance, are handled by PipelineTask-Level provenance.
 This includes both pipeline software versions and third party package versions and is an effect of the design where there are elements of the Science Pipelines (specifically  pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
 
@@ -690,4 +689,4 @@ Recommendations
 .. Make in-text citations with: :cite:`bibkey`.
 
 .. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
-    :style: plain
+    :style: lsst_aa
