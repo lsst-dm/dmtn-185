@@ -683,32 +683,6 @@ Recommendations
 
 - [REC-LOG-3] Individual systems should make clear log renention requirements. 
 
-Additional notes:
-=================
-
--  Is it possible to have a more fine-grained approach to provenance,
-   where some extra intermediates and parent files (heavy footprints,
-   PVIs etc) are kept for the first data release where we anticipate
-   that the trust phase will unbalance the usual space-time trade-off,
-   and also observe what the usage of these products are? This has a
-   different sizing impact that assuming that if we keep something we
-   need the sizing model to support it forever
-
--  Could we have a “gold master verification patch” where we keep
-   everything in order to allow people to “check our work” at whatever
-   level they wish without blowing up the sizing model or figuring out
-   how to systematically store those products/provenance over all the
-   lifetime of the project?
-
--  Amanda to go through EPO use cases:
-
-   -  “FITS header” elements needed to produce “pretty pictures” for
-         public audiences
-
-   -  webcam images to display on a public-facing “observatory status
-         dashboard” webpage.
-
-- We should require a glpbal provenance key for all data curating provenance associating all curated artifacst with a time and if possible a data association. This is to allow collation of provenance curated by heterogenous systems. Original phrasing follows:  [REC-MET-004] As suggested by the QA Strategy Working Group (`DMTN-085 <https://dmtn-085.lsst.io/>`__), collections of related metric values should be stored in a format that can be efficiently queried and joined with survey metadata (e.g., telemetry, exposure id, survey property maps). This data store should be associated with the Data Butler.
 
 
 .. rubric:: References
