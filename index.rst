@@ -31,8 +31,7 @@
      Caption text.
 
    Run: ``make html`` and ``open _build/html/index.html`` to preview your work.
-   See the README at https://github.com/lsst-sqre/lsst-technote-bootstrap or
-   this repo's README for more info.
+   See the README at https://github.com/lsst-sqre/lsst-technote-bootstrap or this repo's README for more info.
 
    Feel free to delete this instructional comment.
 
@@ -58,7 +57,7 @@ Introduction
 This document is the report of the Provenance Working Group charged through :cite:`LDM-722`.
 The charge was to assess the provenance capabilities and uncaptured needs relating to the Gen3/Butler registry.
 
-As the Working Group was constituted with representation from DM, EPO and SIT-COM, we quickly established that it was less than ideal to consider Gen3 provenance in isolation, and we widened the net to include related systems to ensure there were no gaps in the whole-system’s ability to record provenance of interest.
+As the Working Group was constituted with representation from DM, EPO and SIT-COM, we quickly established that it was less than ideal to consider Gen3 provenance in isolation, and we widened the net to include related systems to ensure there were no gaps in the whole system's ability to record provenance of interest.
 Ultimately we conducted a survey of provenance capabilities and needs across all systems that are involved in the kind of activities that will take place during commissioning and operations. As there is no equivalent document, we hope this report will be of use to the wider observatory and eliminate the need to have additional, system-specific Working Groups. The original scope of the charge (Gen3-related provenance) can be found in the section entitled `PipelineTask-level provenance <#_abyshwxrnm0j>`__.
 
 Approach
@@ -71,7 +70,7 @@ We have divided provenance into a set of categories in order to facilitate the d
 3. “What design do we have?” (what baselined or at least conceptual design for capturing and representing provenance information in this category exists), and
 4. “What is the state of implementation?” (what work has already been done).
 
-Following this we provide a set of recommendations in each category, as well a collation and overall recommendations in a concluding section.
+Following this, we provide a set of recommendations in each category, as well as a collation and overall recommendations in a concluding section.
 
 We have endeavoured to be realistic about addressing this topic at a time where the project is already entering the Pre-Ops phase.
 Instead of attempting to capture blank-slate requirements or exhaustive use-cases, we have taken the more pragmatic approach of auditing existing systems (or their design, where not complete), investigated what provenance information is captured (or capturable by them) and what gaps there are, either in provenance capture or in the ability of a system needing to
@@ -105,7 +104,7 @@ Given an exposure that was taken at the telescope, we want to trace: 
 2. the observing script (including version) that was executed that caused this observation,
 3. the science program and field name (data taking campaign) that this observation was taken as part of (e.g., survey, commissioning run, etc.)
 4. Any lower grouping that is meaningful but not derivable by the observing script - for example, a flat belonging to a group of flats taken with the purpose to co-add a master flat
-5. Per-exposure ancillary data, eg. exposure quality flags/grades also should have its provenance recorded; for example if an observer or processing system marks an exposure as "bad", who did it, why and when should be discoverable. 
+5. Per-exposure ancillary data, eg. exposure quality flags/grades also should have its provenance recorded; for example, if an observer or processing system marks an exposure as "bad", who did it, why and when should be discoverable. 
 
 What design do we have?
 -----------------------
@@ -169,7 +168,7 @@ What do we want?
 
 We need to capture the instantaneous state of the system and what conditions it is operating in for situational awareness and to ensure appropriate and responsible scientific rigorousness in data recording.
 This includes a complete picture of the states of all the subsystems, and the surrounding observatory environment (including the aspects of the visible sky, e.g. transmission, brightness).
-For telemetry values we would like to capture their origin, including properties (including software versions) of the CSCs (Commandable Software Components) that produced them. 
+For telemetry values, we would like to capture their origin, including properties (including software versions) of the CSCs (Commandable Software Components) that produced them. 
 
 A separate record of maintenance and other changes in the hardware is made in a separate MMS (maintenance management system) database and should be retrievable by API to observatory reporting systems. 
 Personnel notes and observations are recorded in the observatory-wide logging system.
@@ -190,14 +189,14 @@ Desired provenance data can be inserted and acquired via the SAL XML interface, 
 The LFA is implemented as a local S3 service on the summit and will be synced to the USDF at some cadence, and additional artifacts can be added to it.
 The Camera Control System Database is a source of telemetry information, all of which is not published to the SAL and hence only a subset is captured in the EFD. 
 Observatory human logging including operator comments (for both timely and offline annotation of images and miscellaneous temporal events), in a dedicated database, and shall be accessible via the Science Platform. 
-Similarly any hardware changes across the observatory are in principle recorded in a separate Maintenance Management System (MMS) database which is still under construction.
+Similarly, any hardware changes across the observatory are in principle recorded in a separate Maintenance Management System (MMS) database which is still under construction.
 
 
 What is the state of implementation?
 ------------------------------------
 
 The software architecture is mature and in production.
-However only a minority of CSCs publish all this information at this time.
+However, only a minority of CSCs publish all this information at this time.
 More CSCs are being added all the time as we discover data gaps (e.g. seismic sensors, GIS, HVAC) and will likely continue into operations.
 Any new CSCs should have provenance requirements explicitly stated (e.g. publishing their firmware version along with their telemetry) as makes sense for the CSCs in question. 
 
@@ -214,7 +213,7 @@ Systems under evolving design (e.g. MMS, OLE/OWL) should explicitly address any 
 Recommendations
 ---------------
 
-- [REQ-TEL-001] Invstigate ways to expose all information in the Camera Control System Database to the EFD.
+- [REQ-TEL-001] Investigate ways to expose all information in the Camera Control System Database to the EFD.
 - [REQ-TEL-002] The MMSs should ideally have an API and at the very least a machine-readable export of data that would allow its data to be retrieved by other systems. 
 - [REQ-TEL-003] Any new CSCs (and wherever possible any current CSCs that lack them) should have requirements on what provenance information they should make available to SAL so it can be associated with their telemetry. 
 
@@ -228,7 +227,7 @@ We define software-level provenance as the type of provenance information that:
 1. Records the names and versions of the software that were participants in the system state of interest; “what were the camera readout parameters at the time this observation was taken” for example.
 2. Could make these available in a way that would allow the system to be reconfigured back to that state.
 
-Therefore in scope to this section is data and metadata that would allow the reproduction of a previous state of the software systems of the observatory, including:
+Therefore within the scope of this section is data and metadata that would allow the reproduction of a previous state of the software systems of the observatory, including:
 
 -  Software versions
 -  Container versions
@@ -240,25 +239,25 @@ Therefore in scope to this section is data and metadata that would allow the rep
 What do we want?
 ----------------
 
-In this section we have drawn our examples from Data Management and the Telescope & Site groups as these are more familiar to the committee but our recommendations apply to all contributing software systems (including Camera, Facilities etc).
+In this section, we have drawn our examples from Data Management and the Telescope & Site groups as these are more familiar to the committee but our recommendations apply to all contributing software systems (including Camera, Facilities etc).
 
-In these contexts we want to know (and be able to reproduce) what telescope and instrument software versions were deployed when data taking occurred (such as wavefront sensing configurations, camera readout parameters, pointing models etc).
+In these contexts, we want to know (and be able to reproduce) what telescope and instrument software versions were deployed when data taking occurred (such as wavefront sensing configurations, camera readout parameters, pointing models etc).
 
-Similarly we want to know the contributing code and dependencies that went into the production of a sepcific data product. 
+Similarly, we want to know the contributing code and dependencies that went into the production of a specific data product. 
 
 What design do we have?
 -----------------------
 
-OSS-REQ-0122 specifies that the Data Management system will record provance of all its processing activities including software versions and hardware and operating system configurations used. 
+OSS-REQ-0122 specifies that the Data Management system will record the provenance of all its processing activities including software versions and hardware and operating system configurations used. 
 
 LIT-151 requested that the above requirement not be limited to Data Management, but no action was taken. 
 
-In some cases we have developed software build/test/deploy chains that in practice guarantee a level of reproducibility (e.g. automated tagging of artifacts and a guarantee that the same tag cannot not be applied to two different artifacts).
+In some cases, we have developed software build/test/deploy chains that in practice guarantee a level of reproducibility (e.g. automated tagging of artifacts and a guarantee that the same tag cannot be applied to two different artifacts).
 
 What data paths do we have?
 ---------------------------
 
-Data paths to infromation that would lead to being able to recover a previous state of the system differs. Some examples are:
+Data paths to information that would lead to being able to recover a previous state of the system differs. Some examples are:
 
 
 -  Software version
@@ -269,7 +268,7 @@ Data paths to infromation that would lead to being able to recover a previous st
 
 -  Container versions
 
-   -  DM -- Container images are produced and uploaded to a container repository like DockerHub. As with software the containers have an associated unique hash so they can be identified. The Dockerfile used to produce the images is versioned via git, however, I’m unsure if there is a mechanism for matching up a given image with a git revision of a Dockerfile.
+   -  DM -- Container images are produced and uploaded to a container repository like DockerHub. As with software, the containers have an associated unique hash so they can be identified. The Dockerfile used to produce the images is versioned via git, however, I’m unsure if there is a mechanism for matching up a given image with a git revision of a Dockerfile.
 
    -  T&S -- As in DM container images are uploaded to a container repository and images have a unique hash for identification. Docker files used in deployment are put in a single repository.  These are versioned using cycle versions rather than release versions.  The cycle is determined by SAL and salobj versions.
 
@@ -287,12 +286,12 @@ Data paths to infromation that would lead to being able to recover a previous st
 
 -  Schema evolution
 
-   -  DM -- Schemas for the data products are stored in git and are versioned like other software. In some cases the build/test/deploy chains package the schema with software in containers, providing reprodicibility through that route. In some cases schema for services are versioned by the avro/kafka schema migration machinery.
+   -  DM -- Schemas for the data products are stored in git and are versioned like other software. In some cases the build/test/deploy chains package the schema with software in containers, providing reproducibility through that route. In some cases schema for services are versioned by the avro/kafka schema migration machinery.
 
    -  T&S -- The message schemas are tightly controlled via XML documents that are versioned in git. They have a very strict release process that rolls out changes in the schema to running CSCs as a synchronized event. The Butler does not have a requirement to downgrade to previous schemas. 
 
 Note that versioning in itself is not a sufficient guarantor of reproducibility.
-For example, if some firmware does not have an embedded software version, or if that software version is manually updated, that can create situations were the same software version is assumed and/or reported, but in fact the code has changed.
+For example, if some firmware does not have an embedded software version, or if that software version is manually updated, that can create situations where the same software version is assumed and/or reported, but in fact the code has changed.
 
 What is the state of implementation?
 ------------------------------------
@@ -304,7 +303,7 @@ We are not aware of any tests that verify the ability to recover previous system
 Recommendations
 ---------------
 
-- [REC-SW-1] There are a number of extant versioning mechanisms in DM and T&S software environments. Care should be to not proliferate those unreasonably, but to share software versioning and packaging infrastructure where possible. As these systems are hard to get right, the more teams use them, the more robust they tend to be.
+- [REC-SW-1] There are a number of extant versioning mechanisms in DM and T&S software environments. Care should be to not proliferate those unreasonably but to share software versioning and packaging infrastructure where possible. As these systems are hard to get right, the more teams use them, the more robust they tend to be.
 
 - [REC-SW-2] All systems should have individual explicit requirements addressing what, if any, demands there are to be able to recover a prior system state. When such requirements are needed, the systems should have to capture and publish in a machine-readable form, version information that is necessary to fulfil those requirements. Such requirements should cover the need for data model provenance, eg. whether it is necessary to know when a particular schema was applied to a running system. 
 
@@ -358,7 +357,7 @@ This would, for instance, use the frozen “as-executed” configuration values 
 This re-run capability is needed for validation as well as for use in “virtual data product re-creation” services.
 It will also be needed by Notebook Aspect users.
 
-Additionally we would like a provenance web service to allow Science Platform users to perform these queries, such as the IVOA provenance ProvDAL service.
+Additionally, we would like a provenance web service to allow Science Platform users to perform these queries, such as the IVOA provenance ProvDAL service.
 
 We are not aware of any work that has been done to date on mapping the PipelineTask provenance to common community three-term ontologies for provenance such as the W3C or IVOA provenance models. However, the information content seems likely to have a fairly natural mapping.
 
@@ -402,12 +401,12 @@ Recommendations
 Workflow-level provenance
 =========================
 
-Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system, spedifically software version provenance, are handled by PipelineTask-Level provenance.
-This includes both pipeline software versions and third party package versions and is an effect of the design where there are elements of the Science Pipelines (specifically  pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
+Note that in our architecture, some of the provenance use cases that are typically the domain of the workflow system, specifically software version provenance, are handled by PipelineTask-Level provenance.
+This includes both pipeline software versions and third-party package versions and is an effect of the design where there are elements of the Science Pipelines (specifically  pipe_base) that is “upstream” of the workflow system, as it generates the quantum graph submitted to the workflow.
 
 Similarly, as opposed to some systems where a directed acyclic graph is described in some workflow specific language (or translated from the common workflow language), the source of primacy is the quantum graph computed by the pipeline task framework itself.
 
-The low level workflow system must be able to report details about how quantum graph was executed.
+The low-level workflow system must be able to report details about how the quantum graph was executed.
 Specifics are enumerated in the recommendations.
 
 `LSE-30 <http://ls.st/lse-30>`__ does require operating system and
@@ -432,7 +431,7 @@ File-level provenance
 =====================
 
 We define file-level provenance as the inputs that contributed to the production of that data, including other files and software.
-There are various ways of represent these, e.g. a graph of predecessor data.
+There are various ways of representing these, e.g. a graph of predecessor data.
 By tracing a provenance chain one can then reconstruct the relationship of products to upstream or downstream products and processes.
 
 An alternative means to express provenance would take the form that associates a collection of inputs and outputs, along with a record of a broader pipeline task and configuration.
@@ -441,7 +440,7 @@ was used without *a priori* knowledge of the pipeline processing, but can be muc
 
 Both the above cases can be thought of as an extrapolation of PipelineTask- and Workflow-level provenance to the file level.
 The two cases are not mutually exclusive (ie. they could both be persisted).
-In fact the methods for exploiting the information can be left to the users, so long as the relational information is systematically stored.
+In fact, the methods for exploiting the information can be left to the users, so long as the relational information is systematically stored.
 
 What do we want?
 ----------------
@@ -463,7 +462,7 @@ There is no current design for implementing this. Three options would be:
 An alternative to this approach would be to fulfil the spirit of the requirement by burning into the file a service call (eg. DataLink) that supplies the required provenance information.
 Metadata such as the run collection, dataId, and dataset type are not (currently) stored in persisted formats.
 
-The filename should not be relied to for provenance lookup since it may be changed by the user and furthermore the filenames alone cannot be relied on because they are not unique to a specific processing attempt of a given product.
+The filename should not be relied on for provenance lookup since it may be changed by the user and furthermore, the filenames alone cannot be relied on because they are not unique to a specific processing attempt of a given product.
 
 Finally, it is often NOT desirable to express all parent files that ever led to the creation of a data product as part of that product.
 For example, recording every flat field that was used in the generation of a CalExp that in turn was used as part of a COADD image would be wasteful.
@@ -500,14 +499,14 @@ By source-level provenance we mean astronomical sources in catalogs (sources, ob
 What do we want?
 ----------------
 
-We agree with `DMTN-085 <http://dmtn-085.lsst.io>`__ (report of the QA working group) that there is no strong requirement for pixel level per-source/object provenance beyond an association with the dataset from which the source measurement was derived since  we are no longer using the multifit approach (and its multiple source simultaneous source model fitting approach).
+We agree with `DMTN-085 <http://dmtn-085.lsst.io>`__ (report of the QA working group) that there is no strong requirement for pixel-level per-source/object provenance beyond an association with the dataset from which the source measurement was derived since we are no longer using the multifit approach (and its simultaneous source model-fitting approach).
 
 However, there are per-source metadata that need to be propagated to the final data release product.
 The two that we have identified are flags and footprints
 
 
 Flags include boolean information about the source detection quality, e.g., were there saturated pixels in the detection.
-Flags can also be used to capture processing information such as which objects were used for astrometric calibration, photometric calibration, PSF modeling, and whether a source is an injected fake. 
+Flags can also be used to capture processing information such as which objects were used for astrometric calibration, photometric calibration, PSF modelling, and whether a source is an injected fake. 
 
 A footprint identifies which pixels were used to compute measurements on the source/object.
 Because current deblending algorithms may distribute flux from a single pixel among multiple footprints, there are actually two types of footprint:
@@ -554,14 +553,14 @@ Measurement algorithms produce flags and footprints already.
 The DPDD specifies 64 bits for source flags and 128 bits for object flags.
 We are not aware of an analysis that confirms that these are sufficient.
 
-Though the footprints are computed as part of processing, and are persisted as intermediate products, there is no implementation for providing them to end users (they are available directly through the butler in gen 3).
+Though the footprints are computed as part of processing and are persisted as intermediate products, there is no implementation for providing them to end-users (they are available directly through the butler in gen 3).
 
 Though heavy footprints are included in the sizing model, there is only passing mention of them in the DPDD.
 
 Recommendations
 ---------------
 
-- [REC-SRC-001] Perform a census of produced and planned flags to ensure that 64 bits for sources and 128 bits for objects is sufficient within a generous margin of error. This activity should also be carried out for DIASources and DIAObjects source IDs.
+- [REC-SRC-001] Perform a census of produced and planned flags to ensure that 64 bits for sources and 128 bits for objects are sufficient within a generous margin of error. This activity should also be carried out for DIASources and DIAObjects source IDs.
 
 - [REC-SRC-002] We are concerned that merely encoding a 4-bit data release provenance in a source does not scale to commissioning needs and the project should decide whether it is acceptable for additional information beyond the source ID to be required to fully associate a source with a specific image.
 
@@ -612,7 +611,7 @@ The identifier of this run collection is passed in as an argument to the workflo
 This can serve as a job ID for the metrics system; however note that it is up to the submitter to ask for a unique job ID (as opposed to, for example, a workflow system like Jenkins where a job is submitted and the system assigns the job ID).
 For a further discussion of policies for collection names, see `DMTN-167 <http://dmtn-167.lsst.io>`__ .
 
-The Butler team is planning for the low level executor for pipeline tasks to generate a unique identifier for a pipeline execution run, which effectively can be used as the "job ID" initially envisaged.
+The Butler team is planning for the low-level executor for pipeline tasks to generate a unique identifier for a pipeline execution run, which effectively can be used as the "job ID" initially envisaged.
 
 Given a run identifier, the Butler will be able to be queried for other information pertinent to the run, such as the instrument the processed data originated from.
 
@@ -627,7 +626,7 @@ When tasks that compute metrics put the lsst.verify.Measurement back into butler
 (This approach is used, for example, by the faro metrics calculation software.)
 An advantage of this approach is that the configuration information used for the execution is also stored in the Butler repo.
 
-Storing metrics in the Butler as ad-hoc datasets signicantly limits the usability and utility of these metrics. If the metrics were supported  as a native structured Butler dataset, then we would be able to
+Storing metrics in the Butler as ad-hoc datasets significantly limits the usability and utility of these metrics. If the metrics were supported  as a native structured Butler dataset, then we would be able to
 
 1. Query the Butler for what metrics are available (metrics discovery)
 2. Have the ability to filter other Butler queries on the basis of metric measurements
@@ -640,7 +639,7 @@ Recommendations
 
 - [REC-MET-001] For metrics that can be associated with a Butler dataId, the metrics should be persisted using the Data Butler as the source of truth. The dataId associated with the metric should use the full granularity.
 - [REC-MET-002] Any system that uses Butler data to derive metrics should persist them in the Butler provided that the metrics are associable with a Data ID.
-- [REC-MET-003] When lsst.verify.Job objects are exported, the exported object should included the needed information (run collection and dataId) to associate with the source of truth metric persisted with the Data Butler.
+- [REC-MET-003] When lsst.verify.Job objects are exported, the exported object should include the needed information (run collection and dataId) to associate with the source of truth metric persisted with the Data Butler.
 - [REC-MET-004] A plan should be developed for persisting metrics that are not directly associated with Butler-persisted data.
 - [REC-MET-005] Even if effort for implementation is not available in construction, we should develop a conceptual design for structured, semantically rich storage of metrics in the Butler.
 
@@ -651,7 +650,7 @@ Log Provenance
 What do we want?
 ----------------
 
-Logs, i.e., machine-generated output from software and systems involved in data taking are sometimes necessary in order to understand unexpected behaviour.
+Logs, i.e., machine-generated output from software and systems involved in data-taking are sometimes necessary in order to understand unexpected behaviour.
 Log provenance shares most provenance requirement with metrics data, except for being a blob rather than a scalar. 
 
 What data paths do we have?
@@ -674,7 +673,7 @@ Recommendations
 
 - [REC-LOG-2] Each site (summit, IDF, USDF, UKDF, FRDF) should provide a log management solution or dispatch to another site's log management service to aid log discoverability.
 
-- [REC-LOG-3] Individual systems should make clear log renention requirements. 
+- [REC-LOG-3] Individual systems should make clear log retention requirements. 
 
 
 
